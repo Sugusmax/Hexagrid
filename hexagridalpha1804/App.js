@@ -175,10 +175,15 @@ export default function App() {
 
           {/* Aquí agregaríamos el menú, que en este momento solo muestra un aviso */}
           {menuVisible && (
-            <View style={styles.menu}>
-              <Text style={styles.menuText}>Menú de opciones</Text>
-            </View>
-          )}
+  <View style={styles.menu}>
+    <TouchableOpacity onPress={saveGridToFile} style={styles.menuOption}>
+      <Text style={styles.menuText}>Guardar Grid</Text>
+    </TouchableOpacity>
+    <TouchableOpacity onPress={loadGridFromFile} style={styles.menuOption}>
+      <Text style={styles.menuText}>Cargar Grid</Text>
+    </TouchableOpacity>
+  </View>
+)}
 
           {hexImage &&
             hexagons.map(({ q, r }) => {
