@@ -345,4 +345,10 @@ const styles = StyleSheet.create({
   menuText: {
     color: '#fff',
   },
+menuOption: {
+  marginBottom: 10,
+},
+menuText: {
+  color: '#fff',
+},
 });
