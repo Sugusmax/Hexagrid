@@ -26,8 +26,21 @@ const saveGridToFile = async () => {
     Alert.alert('Error', 'No se pudo guardar el archivo: ' + error.message);
   }
 };
+const loadGridFromFile = async () => {
+  const fileUri = FileSystem.documentDirectory + 'gridData.json';
 
+  try {
+    const fileContents = await FileSystem.readAsStringAsync(fileUri);
+    const data = JSON.parse(fileContents);
 
+    setHexagons(data.hexagons || []); // Actualiza los hexágonos
+    setTexts(data.texts || {});       // Actualiza los textos
+    setImages(data.images || {});     // Actualiza las imágenes
+    Alert.alert('Éxito', 'Datos cargados desde gridData.json');
+  } catch (error) {
+    Alert.alert('Error', 'No se pudo cargar el archivo: ' + error.message);
+  }
+};
 const HEX_SIZE = 50;
 const SPACING = 2;
 const window = Dimensions.get('window');
