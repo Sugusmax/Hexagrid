@@ -13,6 +13,20 @@ import * as ImagePicker from 'expo-image-picker';
 import { GestureHandlerRootView, PanGestureHandler } from 'react-native-gesture-handler';
 import MaskedView from '@react-native-masked-view/masked-view';
 import { Ionicons } from '@expo/vector-icons';
+import * as FileSystem from 'expo-file-system';
+
+const saveGridToFile = async () => {
+  const data = { hexagons, texts, images }; // Los datos actuales del estado
+  const fileUri = FileSystem.documentDirectory + 'gridData.json';
+
+  try {
+    await FileSystem.writeAsStringAsync(fileUri, JSON.stringify(data));
+    Alert.alert('Éxito', 'Datos guardados en gridData.json');
+  } catch (error) {
+    Alert.alert('Error', 'No se pudo guardar el archivo: ' + error.message);
+  }
+};
+
 
 const HEX_SIZE = 50;
 const SPACING = 2;
