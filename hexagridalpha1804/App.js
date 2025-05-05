@@ -44,18 +44,36 @@ export default function App() {
   }, [hexagons]);
 
   const saveGrid = async () => {
-    try {
-      await FileSystem.writeAsStringAsync(FileSystem.documentDirectory + 'grid.json', JSON.stringify({ hexagons, texts, images }));
-      Alert.alert('Guardado', 'Grid almacenado en grid.json');
-    } catch (e) { Alert.alert('Error', e.message); }
-  };
+  try {
+    const filename = `grid-${Date.now()}.json`;
+    const path = FileSystem.documentDirectory + filename;
+    const content = JSON.stringify({ hexagons, texts, images });
+    await FileSystem.writeAsStringAsync(path, content);
+    if (await Sharing.isAvailableAsync()) {
+      await Sharing.shareAsync(path);
+    } else {
+      Alert.alert('Guardado local', `Archivo guardado en:\n${path}`);
+    }
+  } catch (e) {
+    Alert.alert('Error al guardar', e.message);
+  }
+};
 
   const loadGrid = async () => {
-    try {
-      const { hexagons: h, texts: t, images: i } = JSON.parse(await FileSystem.readAsStringAsync(FileSystem.documentDirectory + 'grid.json'));
-      setHexagons(h || []), setTexts(t || {}), setImages(i || {}), Alert.alert('Cargado', 'Grid restaurado de grid.json');
-    } catch (e) { Alert.alert('Error', e.message); }
-  };
+  try {
+    const result = await DocumentPicker.getDocumentAsync({ type: 'application/json' });
+    if (result.type === 'success') {
+      const content = await FileSystem.readAsStringAsync(result.uri);
+      const { hexagons: h, texts: t, images: i } = JSON.parse(content);
+      setHexagons(h || []);
+      setTexts(t || {});
+      setImages(i || {});
+      Alert.alert('Cargado', `Grid restaurado desde:\n${result.name}`);
+    }
+  } catch (e) {
+    Alert.alert('Error al cargar', e.message);
+  }
+};
 
   const handleHexPress = (q, r) => (setSelected(`${q},${r}`), setModalText(texts[`${q},${r}`] || ''), setModalVisible(true));
   const handleImagePick = async () => {
