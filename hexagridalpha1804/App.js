@@ -7,6 +7,8 @@ import * as FileSystem from 'expo-file-system';
 import { GestureHandlerRootView, PanGestureHandler } from 'react-native-gesture-handler';
 import { Ionicons } from '@expo/vector-icons';
 import MaskedView from '@react-native-masked-view/masked-view';
+import * as DocumentPicker from 'expo-document-picker';
+import * as Sharing from 'expo-sharing';
 
 const HEX_SIZE = 50, SPACING = 2, window = Dimensions.get('window');
 const HEX_WIDTH = Math.sqrt(3) * (HEX_SIZE + SPACING), HEX_HEIGHT = (HEX_SIZE + SPACING) * 1.5;
