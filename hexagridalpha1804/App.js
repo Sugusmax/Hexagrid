@@ -7,8 +7,6 @@ import * as FileSystem from 'expo-file-system';
 import { GestureHandlerRootView, PanGestureHandler } from 'react-native-gesture-handler';
 import { Ionicons } from '@expo/vector-icons';
 import MaskedView from '@react-native-masked-view/masked-view';
-import * as DocumentPicker from 'expo-document-picker';
-import * as Sharing from 'expo-sharing';
 
 const HEX_SIZE = 50, SPACING = 2, window = Dimensions.get('window');
 const HEX_WIDTH = Math.sqrt(3) * (HEX_SIZE + SPACING), HEX_HEIGHT = (HEX_SIZE + SPACING) * 1.5;
@@ -29,8 +27,19 @@ export default function App() {
   const [bounds, setBounds] = useState({ minX: 0, maxX: 0, minY: 0, maxY: 0 });
 
   useEffect(() => {
-    setHexagons(generateHexGrid(RADIUS)), setHexImage(require('./assets/hexagon.png'));
+    initializeGrid();
   }, []);
+
+  const initializeGrid = () => {
+    setHexagons(generateHexGrid(RADIUS));
+    setHexImage(require('./assets/hexagon.png'));
+    setTexts({});
+    setImages({});
+    setOffset({ x: 0, y: 0 });
+    setGestureOffset({ x: 0, y: 0 });
+    setSelected(null);
+    setModalText('');
+  };
 
   useEffect(() => {
     if (!hexagons.length) return;
@@ -46,36 +55,33 @@ export default function App() {
   }, [hexagons]);
 
   const saveGrid = async () => {
-  try {
-    const filename = `grid-${Date.now()}.json`;
-    const path = FileSystem.documentDirectory + filename;
-    const content = JSON.stringify({ hexagons, texts, images });
-    await FileSystem.writeAsStringAsync(path, content);
-    if (await Sharing.isAvailableAsync()) {
-      await Sharing.shareAsync(path);
-    } else {
-      Alert.alert('Guardado local', `Archivo guardado en:\n${path}`);
-    }
-  } catch (e) {
-    Alert.alert('Error al guardar', e.message);
-  }
-};
+    try {
+      await FileSystem.writeAsStringAsync(FileSystem.documentDirectory + 'grid.json', JSON.stringify({ hexagons, texts, images }));
+      Alert.alert('Guardado', 'Grid almacenado en grid.json');
+    } catch (e) { Alert.alert('Error', e.message); }
+  };
 
   const loadGrid = async () => {
-  try {
-    const result = await DocumentPicker.getDocumentAsync({ type: 'application/json' });
-    if (result.type === 'success') {
-      const content = await FileSystem.readAsStringAsync(result.uri);
-      const { hexagons: h, texts: t, images: i } = JSON.parse(content);
+    try {
+      const { hexagons: h, texts: t, images: i } = JSON.parse(await FileSystem.readAsStringAsync(FileSystem.documentDirectory + 'grid.json'));
       setHexagons(h || []);
       setTexts(t || {});
       setImages(i || {});
-      Alert.alert('Cargado', `Grid restaurado desde:\n${result.name}`);
-    }
-  } catch (e) {
-    Alert.alert('Error al cargar', e.message);
-  }
-};
+      Alert.alert('Cargado', 'Grid restaurado de grid.json');
+    } catch (e) { Alert.alert('Error', e.message); }
+  };
+
+  const handleNewGrid = () => {
+    Alert.alert(
+      'Confirmar',
+      '¿Estás seguro que quieres comenzar un nuevo grid? Esto eliminará el progreso actual.',
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        { text: 'Aceptar', onPress: initializeGrid },
+      ],
+      { cancelable: true }
+    );
+  };
 
   const handleHexPress = (q, r) => (setSelected(`${q},${r}`), setModalText(texts[`${q},${r}`] || ''), setModalVisible(true));
   const handleImagePick = async () => {
@@ -105,6 +111,9 @@ export default function App() {
               </TouchableOpacity>
               <TouchableOpacity onPress={loadGrid} style={styles.menuOption}>
                 <Text style={styles.menuText}>Cargar</Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={handleNewGrid} style={styles.menuOption}>
+                <Text style={styles.menuText}>Nuevo Grid</Text>
               </TouchableOpacity>
             </View>
           )}
